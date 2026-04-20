@@ -53,6 +53,42 @@ $$\hat{\text{ATT}}_{AIPW} = \frac{1}{n_t} \sum_i \left[ T_i (Y_i - \hat\mu_0(X_i
 
 Consistent if **either** the propensity model or the outcome model $\hat\mu_0$ is correct. This is the modern default — a small free hedge against misspecification.
 
+### 5. Sensitivity to unmeasured confounding
+
+Everything above assumes **conditional unconfoundedness**: no unobserved variable affects both treatment and outcome. That assumption is untestable from the data, so serious observational work also reports how fragile the conclusion would be under violation.
+
+This case study ships two complementary sensitivity tools in `src/sensitivity.py`:
+
+**E-value (VanderWeele & Ding, 2017).** The minimum strength of association, on the risk-ratio scale, that an unmeasured confounder $U$ would need with both $T$ and $Y$ (conditional on $X$) to *fully* explain away the effect:
+
+$$E = RR + \sqrt{RR(RR-1)}$$
+
+For continuous outcomes we use Chinn's approximation $RR \approx \exp(0.91 \cdot d)$ where $d$ = ATT / SD(Y).
+E-values are reported for both the point estimate and the CI bound nearest the null (following VanderWeele-Ding's guidance).
+
+**Rosenbaum bounds (Rosenbaum, 2002).** For 1-to-1 matched pairs, the sensitivity parameter $\Gamma$ bounds the odds that two matched units with the same $X$ could nevertheless have differential treatment probabilities (because of hidden confounder $U$). We sweep $\Gamma \ge 1$ and report the worst-case one-sided Wilcoxon signed-rank p-value at each level, then solve for the threshold $\Gamma^\star$ at which the result becomes non-significant at $\alpha=0.05$.
+
+```python
+from sensitivity import (
+    e_value,
+    matched_pair_differences,
+    rosenbaum_gamma_threshold,
+    rosenbaum_wilcoxon_bounds,
+)
+
+diffs = matched_pair_differences(X, T, Y, caliper_sd=0.2)
+att = diffs.mean()
+sd_y = Y[T == 0].std(ddof=1)
+
+ev = e_value(att, sd_outcome=sd_y, ci_low=ci_low, ci_high=ci_high)
+# -> EValue(RR=..., point=..., CI=..., scale=continuous ...)
+
+g_star = rosenbaum_gamma_threshold(diffs, alpha=0.05, alternative="greater")
+bounds = rosenbaum_wilcoxon_bounds(diffs, gammas=[1.0, 1.25, 1.5, 2.0, 3.0])
+```
+
+Reporting pattern to hand a PM or legal reviewer: *"The matched ATT is +\$50 (95% CI [\$30, \$70]). The E-value of 2.1 on the CI means an unmeasured confounder would need 2.1-fold associations with both install decision and spend to explain the finding. The matched pairs survive Rosenbaum sensitivity up to $\Gamma^\star = 1.9$ — i.e., hidden confounders could almost double the within-pair odds of installation before we'd fail to detect a positive effect."*
+
 ## How to reproduce
 
 ```bash
