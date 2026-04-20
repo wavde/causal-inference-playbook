@@ -29,13 +29,28 @@ def test_cuped_preserves_mean_under_randomization():
     assert abs(y_adj.mean() - df["minutes"].mean()) < 0.01
 
 
-def test_cuped_unbiased_for_ate():
+def test_cuped_agrees_with_naive_pointwise():
+    """For any given sample, CUPED and naive should give similar point estimates
+    (they estimate the same ATE; they just differ in variance). The difference
+    should be small relative to the naive SE."""
     df = simulate_experiment(n=20_000, true_effect=3.0, seed=42)
     naive = naive_ab_test(df, "minutes", "treatment")
     cuped = cuped_ab_test(df, "minutes", "treatment", "pre_minutes")
-    # Both estimators should recover the true effect within CI
-    assert naive.ci_low < 3.0 < naive.ci_high
-    assert cuped.ci_low < 3.0 < cuped.ci_high
+    assert abs(cuped.estimate - naive.estimate) < naive.std_error
+
+
+def test_cuped_unbiased_across_seeds():
+    """Averaging across many simulated experiments, CUPED should recover the
+    true effect. This is the honest unbiasedness check."""
+    estimates = []
+    for seed in range(100):
+        df = simulate_experiment(n=5_000, true_effect=3.0, seed=seed)
+        estimates.append(
+            cuped_ab_test(df, "minutes", "treatment", "pre_minutes").estimate
+        )
+    mean_est = float(np.mean(estimates))
+    # 100 runs at n=5000, SE per run ~0.8 for naive; mean-of-means SE ~0.08
+    assert abs(mean_est - 3.0) < 0.15
 
 
 def test_cuped_reduces_standard_error():

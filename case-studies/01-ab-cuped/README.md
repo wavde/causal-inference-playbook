@@ -32,27 +32,20 @@ cd case-studies/01-ab-cuped
 python src/run.py
 ```
 
-Expected output (seed=42):
+With the default seed, the script prints the naive Welch result, the CUPED result, and three diagnostics: the theoretical variance reduction `1 - ρ²`, the observed SE ratio, and the equivalent sample-size multiplier.
 
-```
-Sample size: 20,000  (treated=9,987)
+## Results (typical run, ρ ≈ 0.7)
 
-naive_welch: ATE=+3.1123 (95% CI [+2.3842, +3.8404], SE=0.3714, p=0.0000, n_t=9987, n_c=10013)
-cuped(theta=0.703): ATE=+3.0884 (95% CI [+2.5732, +3.6036], SE=0.2628, p=0.0000, n_t=9987, n_c=10013)
+| Method | SE |
+|--------|----|
+| Naive Welch t-test | ~0.37 |
+| CUPED (θ ≈ 0.70) | ~0.26 |
 
-Expected variance reduction (1 - rho^2): 0.510
-Observed SE ratio (CUPED / naive):        0.708
-Equivalent sample-size multiplier:        2.00x
-```
+- **Point estimates agree** between the two methods (they estimate the same ATE — CUPED is just lower-variance).
+- **Standard error drops by ~30%** with ρ ≈ 0.7, matching the theoretical `√(1 - ρ²) ≈ 0.71`.
+- **Sample-size equivalent: ~2×.** The same decision could be made with half as many users, or equivalently in half the time.
 
-## Results
-
-| Method | ATE | 95% CI | SE |
-|--------|-----|--------|-----|
-| Naive Welch t-test | +3.11 min | [+2.38, +3.84] | 0.37 |
-| CUPED (θ=0.70) | +3.09 min | [+2.57, +3.60] | **0.26** |
-
-Both estimates are close to the true effect of +3.0 minutes (the small gap is Monte Carlo noise, as expected). The CUPED standard error is ~30% smaller, which means the same decision could have been made with ~50% fewer users — or equivalently, in half the time.
+Cross-seed unbiasedness is exercised in `tests/test_cuped.py::test_cuped_unbiased_across_seeds`, which averages 100 simulated experiments.
 
 ## When CUPED helps (and when it doesn't)
 
