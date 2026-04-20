@@ -126,6 +126,90 @@ def msprt_sequential_test(
     )
 
 
+def msprt_cuped(
+    y_t: np.ndarray,
+    y_c: np.ndarray,
+    x_t: np.ndarray,
+    x_c: np.ndarray,
+    alpha: float = 0.05,
+    tau: float | None = None,
+    sigma: float | None = None,
+    theta: float | None = None,
+    look_every: int = 50,
+    min_n: int = 100,
+) -> SequentialResult:
+    """
+    CUPED-adjusted mSPRT: combine variance reduction from a pre-experiment
+    covariate (Deng et al. 2013) with always-valid sequential testing
+    (Robbins 1970, Johari et al. 2017).
+
+    The CUPED-adjusted outcome is
+        tilde Y = Y - theta * (X - mean(X))
+    whose variance is (1 - rho^2) times that of Y (where rho = corr(Y, X)).
+    Running mSPRT on tilde Y therefore hits its stopping threshold in
+    roughly (1 - rho^2) of the samples that a plain mSPRT would need
+    under the alternative, while retaining the always-valid Type-I
+    guarantee.
+
+    Both ``theta`` and ``sigma`` are estimated from the first look using
+    pooled data and then **frozen** for the rest of the stream, which
+    preserves the martingale structure of the likelihood ratio under H0.
+
+    Parameters
+    ----------
+    y_t, y_c : streamed outcomes for treatment and control.
+    x_t, x_c : pre-experiment covariates (same length as y_*).
+    alpha : Type-I error.
+    tau : prior SD over the effect; defaults to sigma(tilde Y).
+    sigma : per-obs SD of tilde Y; if None, estimated from the first look.
+    theta : CUPED coefficient; if None, fit from the first look on pooled
+        pre-period covariates and outcomes.
+    look_every, min_n : peek cadence and warm-up size.
+
+    Returns
+    -------
+    SequentialResult with ``method='mSPRT+CUPED'``.
+    """
+    if len(x_t) != len(y_t) or len(x_c) != len(y_c):
+        raise ValueError("x_* arrays must match y_* lengths")
+    n_max = min(len(y_t), len(y_c))
+    threshold = np.log(1 / alpha)
+    init_n = max(min_n, look_every)
+
+    if theta is None:
+        y_init = np.concatenate([y_t[:init_n], y_c[:init_n]])
+        x_init = np.concatenate([x_t[:init_n], x_c[:init_n]])
+        var_x = float(np.var(x_init, ddof=1))
+        theta = 0.0 if var_x == 0 else float(np.cov(y_init, x_init, ddof=1)[0, 1] / var_x)
+
+    x_mean = float(np.concatenate([x_t[:init_n], x_c[:init_n]]).mean())
+    yt_adj = y_t - theta * (x_t - x_mean)
+    yc_adj = y_c - theta * (x_c - x_mean)
+
+    if sigma is None:
+        pooled = np.concatenate([yt_adj[:init_n], yc_adj[:init_n]])
+        sigma = float(pooled.std(ddof=1))
+    if tau is None:
+        tau = sigma
+
+    n = init_n
+    while n <= n_max:
+        delta_hat = float(yt_adj[:n].mean() - yc_adj[:n].mean())
+        log_lr = msprt_log_likelihood_ratio(delta_hat, n, sigma, tau)
+        if log_lr >= threshold:
+            return SequentialResult(
+                rejected=True, stopped_at=n,
+                final_estimate=delta_hat, method="mSPRT+CUPED",
+            )
+        n += look_every
+
+    delta_hat = float(yt_adj[:n_max].mean() - yc_adj[:n_max].mean())
+    return SequentialResult(
+        rejected=False, stopped_at=n_max,
+        final_estimate=delta_hat, method="mSPRT+CUPED",
+    )
+
+
 @lru_cache(maxsize=128)
 def pocock_critical_value(alpha: float, K: int) -> float:
     """

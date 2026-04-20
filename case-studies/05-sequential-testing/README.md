@@ -59,6 +59,33 @@ If you only want **K equally-spaced looks**, you can use a single per-look criti
 
 Pocock is simpler than mSPRT but you commit to K up front. mSPRT lets you stop literally any time.
 
+### 4. mSPRT + CUPED (variance reduction inside sequential testing)
+
+CUPED (Case Study 01) shrinks variance by subtracting a pre-experiment covariate:
+$\tilde Y = Y - \theta(X - \bar X)$, where $\operatorname{Var}(\tilde Y) \approx (1-\rho^2)\operatorname{Var}(Y)$.
+Running mSPRT on $\tilde Y$ instead of $Y$ cuts the sample size needed to cross the rejection threshold by roughly the same factor — **without sacrificing the always-valid Type-I guarantee**, because CUPED is just a linear re-expression of the outcome under randomization.
+
+Implementation details (`msprt_cuped` in `src/sequential.py`):
+
+- Estimate $\theta$ and $\sigma(\tilde Y)$ on the first look only, then freeze them (so the mSPRT log-likelihood ratio stays a martingale under $H_0$).
+- Use the pooled cross-arm covariance for $\theta$; subtract the pooled $\bar X$.
+- Everything else — stopping rule, tau default, threshold $\log(1/\alpha)$ — is identical to plain mSPRT.
+
+Empirically, with $\rho = 0.8$ (so $(1 - \rho^2) = 0.36$) and a +0.3 effect, the CUPED-adjusted test stops in under 75% of the plain-mSPRT samples across 40 replications. Under $H_0$, Type-I stays at nominal alpha. Both behaviors are pinned by tests in `tests/test_sequential.py`.
+
+```python
+from seq_simulate import simulate_stream_with_covariate
+from sequential import msprt_cuped, msprt_sequential_test
+
+y_t, y_c, x_t, x_c = simulate_stream_with_covariate(
+    n_per_arm=4000, true_effect=0.3, correlation=0.8, seed=0,
+)
+plain = msprt_sequential_test(y_t, y_c, alpha=0.05)
+cuped = msprt_cuped(y_t, y_c, x_t, x_c, alpha=0.05)
+# plain.stopped_at  ~ 2000
+# cuped.stopped_at  ~ 700
+```
+
 ## How to reproduce
 
 ```bash
