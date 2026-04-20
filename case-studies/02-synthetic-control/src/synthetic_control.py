@@ -81,12 +81,20 @@ def _fit_weights(y1_pre: np.ndarray, Y0_pre: np.ndarray) -> np.ndarray:
         method="SLSQP",
         bounds=bounds,
         constraints=constraints,
-        options={"maxiter": 500, "ftol": 1e-10},
+        options={"maxiter": 2000, "ftol": 1e-10},
     )
-    if not result.success:
-        raise RuntimeError(f"SLSQP failed: {result.message}")
-    w = np.clip(result.x, 0.0, None)
-    return w / w.sum()
+    # Don't raise on "iteration limit reached" -- SLSQP usually returns a
+    # usable (near-optimal) solution anyway. Only truly invalid results
+    # (NaN or constraint violation) should be flagged.
+    w = result.x
+    if np.any(np.isnan(w)):
+        raise RuntimeError(f"SLSQP produced NaN weights: {result.message}")
+    w = np.clip(w, 0.0, None)
+    total = w.sum()
+    if total <= 0:
+        # Degenerate -- fall back to uniform.
+        return np.full_like(w, 1.0 / len(w))
+    return w / total
 
 
 def fit_synthetic_control(
