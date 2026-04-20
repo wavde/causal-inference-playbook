@@ -3,6 +3,8 @@
 **Method:** Two-way fixed-effects DiD + event-study with parallel-trends test.
 **Question:** *We rolled out a feature to some markets but not others. How much did it lift our north-star metric, and can I trust the estimate?*
 
+![hero](docs/hero.png)
+
 ## TL;DR
 
 On a simulated 30-country × 20-month panel (10 treated countries, true ATT = +2 minutes/DAU), the two-way-FE DiD recovers ATT within ±0.5 with cluster-robust SE. The event study shows pre-treatment leads ≈ 0 (parallel-trends F-test p > 0.05) and post-treatment lags clustered near +2. When parallel trends are deliberately broken, the same estimator returns an inflated effect *and* the leads test correctly rejects.

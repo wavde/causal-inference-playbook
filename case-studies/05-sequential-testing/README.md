@@ -3,6 +3,8 @@
 **Method:** Always-valid sequential A/B testing — mSPRT and Pocock alpha-spending.
 **Question:** *Why can't I just check the p-value every day and stop the experiment as soon as it's significant?*
 
+![hero](docs/hero.png)
+
 ## TL;DR
 
 On 500 simulated experiments under H0 (no real effect), checking p-values **once at the end** keeps Type-I error at the nominal 5%. Checking **every 100 users** inflates it to ~30%. Both **mSPRT** and **Pocock** keep it back near 5% — at the cost of a slightly higher detection threshold. Under H1, mSPRT stops in ~40% of the planned horizon when the effect is large, with controlled false positives.

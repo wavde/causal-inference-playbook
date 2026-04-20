@@ -3,6 +3,8 @@
 **Method:** Abadie, Diamond, Hainmueller (2010) synthetic control.
 **Question:** *What would have happened to subscribers in the country where we raised prices, if we hadn't raised them?*
 
+![hero](docs/hero.png)
+
 ## TL;DR
 
 On a simulated panel of 20 countries over 30 months (price bump applied to one country after month 20, true effect = −5 subscribers), synthetic control recovers ATT within ±1 of the truth, with a placebo-in-space empirical p-value ≤ 0.05 and a near-zero placebo-in-time effect.

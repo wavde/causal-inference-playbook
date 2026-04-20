@@ -2,6 +2,8 @@
 
 > **Claim.** User-level A/B tests are biased when users in the same market share inventory. Switchback (block-level randomization) removes the bias by breaking interference between arms.
 
+![hero](docs/hero.png)
+
 ## The business problem
 
 You're an analyst at a marketplace — rides, ads, listings, promo codes, whatever has a shared supply side. PM wants to ship a new ranking algo. You run a standard user-level A/B and see **+30%** on conversion. You ship it, then realize the production lift was closer to **+10%**. What happened?

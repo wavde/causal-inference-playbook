@@ -3,6 +3,8 @@
 **Method:** Regression-adjusted A/B analysis using a pre-experiment covariate.
 **Paper:** Deng, Xu, Kohavi, Walker (2013), *Improving the Sensitivity of Online Controlled Experiments by Utilizing Pre-Experiment Data.*
 
+![hero](docs/hero.png)
+
 ## TL;DR
 
 On a simulated streaming A/B test (N=20,000, true effect = +3 minutes watched), CUPED cut the standard error of the treatment effect by ~30% — equivalent to roughly **2× more statistical power for free**, just by using pre-experiment engagement as a covariate.

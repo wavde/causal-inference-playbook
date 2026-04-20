@@ -3,6 +3,8 @@
 **Method:** 1-NN propensity score matching with caliper, IPW, and AIPW (doubly-robust).
 **Question:** *We can't randomize who installs the mobile app. Did app installation actually drive higher spend, or are app installers just inherently more engaged users?*
 
+![hero](docs/hero.png)
+
 ## TL;DR
 
 On 5,000 simulated e-commerce users where the true effect of app install is +$50 in annual spend, the **naive comparison** of installers vs non-installers reads ≈ +$95 — almost 2× too high — because installers are already heavier, premium, younger users. PSM, IPW, and AIPW all recover ATT within ±$5 of the truth and reduce average covariate imbalance (|SMD|) from ~0.5 to <0.1.
