@@ -40,6 +40,8 @@ We also filter placebos with very poor pre-fit (pre-RMSPE > 20× treated's) — 
 
 ## How to reproduce
 
+### Simulated demo
+
 ```bash
 cd case-studies/02-synthetic-control
 python src/run.py
@@ -56,6 +58,14 @@ SyntheticControl(ATT=-4.9, RMSPE pre=0.85 post=5.1 ratio=6.0, top donors: countr
 Placebo-in-space p-value (RMSPE-ratio rank): 0.050
 Placebo-in-time ATT (should be ~0): -0.2
 ```
+
+### Real-data replication: California Proposition 99
+
+```bash
+python case-studies/02-synthetic-control/california/run_california.py
+```
+
+Replicates Abadie, Diamond, Hainmueller (2010) on the canonical 39-state cigarette panel. Point estimate is within 3% of the published ATT (~−19 packs/capita/year). See [`california/README.md`](california/README.md).
 
 ## When synthetic control helps (and when it doesn't)
 

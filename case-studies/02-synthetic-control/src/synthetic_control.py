@@ -175,16 +175,23 @@ def in_space_placebo(
     return out
 
 
-def placebo_pvalue(placebo_results: dict[str, SyntheticControlResult], treated_name: str) -> float:
+def placebo_pvalue(
+    placebo_results: dict[str, SyntheticControlResult],
+    treated_name: str,
+    rmspe_cutoff_multiplier: float = 20.0,
+) -> float:
     """
     Two-sided empirical p-value based on the RMSPE ratio (Abadie 2010, §4).
 
     Standard practice (Abadie 2015) is to filter donors with very poor
-    pre-period fit. We keep only donors whose pre-RMSPE is within 20x the
-    treated unit's pre-RMSPE.
+    pre-period fit. ``rmspe_cutoff_multiplier`` controls how lenient that
+    filter is; donors whose pre-RMSPE exceeds ``cutoff_multiplier`` times the
+    treated unit's pre-RMSPE are dropped. The default (20x) is permissive and
+    preserves legacy behavior; Abadie (2010) uses the equivalent of ~2.24x
+    (a 5x MSPE threshold).
     """
     treated = placebo_results[treated_name]
-    cutoff = treated.rmspe_pre * 20
+    cutoff = treated.rmspe_pre * rmspe_cutoff_multiplier
     ratios = [
         r.rmspe_ratio
         for name, r in placebo_results.items()
