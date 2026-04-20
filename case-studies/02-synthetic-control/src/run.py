@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from simulate import panel_to_matrix, simulate_panel  # noqa: E402
+from sc_simulate import panel_to_matrix, simulate_panel  # noqa: E402
 from synthetic_control import (  # noqa: E402
     fit_synthetic_control,
     in_space_placebo,

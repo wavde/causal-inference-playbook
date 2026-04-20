@@ -11,7 +11,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "case-studies" / "02-synthetic-control" / "src"))
 
-from simulate import panel_to_matrix, simulate_panel  # noqa: E402
+from sc_simulate import panel_to_matrix, simulate_panel  # noqa: E402
 from synthetic_control import (  # noqa: E402
     _fit_weights,
     fit_synthetic_control,
