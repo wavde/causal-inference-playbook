@@ -4,6 +4,8 @@
 
 ![CI](https://github.com/wavde/causal-inference-playbook/actions/workflows/ci.yml/badge.svg)
 
+![hero](docs/hero.png)
+
 ## Why this repo
 
 A/B tests are only part of the job. Senior analytics work at FAANG-scale companies demands a broader toolkit:
