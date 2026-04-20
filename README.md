@@ -26,6 +26,7 @@ Each case study pairs working code with a written writeup.
 | 03 | [Difference-in-differences](case-studies/03-diff-in-diff/) | TWFE + event study + parallel-trends test | ✅ Complete |
 | 04 | [Propensity score matching](case-studies/04-propensity-score/) | PSM + IPW + doubly-robust (AIPW) | ✅ Complete |
 | 05 | [Sequential testing](case-studies/05-sequential-testing/) | mSPRT + Pocock alpha-spending | ✅ Complete |
+| 06 | [Switchback (marketplace)](case-studies/06-switchback/) | Block-level randomization under SUTVA violation | ✅ Complete |
 
 Each case study follows the same skeleton:
 
