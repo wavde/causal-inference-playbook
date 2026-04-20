@@ -92,8 +92,9 @@ def _fit_weights(y1_pre: np.ndarray, Y0_pre: np.ndarray) -> np.ndarray:
     w = np.clip(w, 0.0, None)
     total = w.sum()
     if total <= 0:
-        # Degenerate -- fall back to uniform.
-        return np.full_like(w, 1.0 / len(w))
+        raise RuntimeError(
+            f"SLSQP produced degenerate weights (all zero after clipping): {result.message}"
+        )
     return w / total
 
 

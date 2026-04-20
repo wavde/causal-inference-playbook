@@ -171,13 +171,20 @@ def event_study(
     coefs = pd.DataFrame(rows).sort_values("relative_time").reset_index(drop=True)
 
     # Parallel trends F-test: joint significance of all pre-treatment leads.
+    # Use a restriction matrix R (n_pre × n_params) picking out the pre-period
+    # interaction columns rather than a string formula, which is fragile with
+    # signed column names like ``D_k-5``.
     pre_cols = [
         f"D_k{k:+d}"
         for k in rel_times_to_use
         if k < omit_relative_time
     ]
     if pre_cols:
-        pt_test = fit.f_test(" = 0, ".join(pre_cols) + " = 0")
+        param_index = list(fit.params.index)
+        R = np.zeros((len(pre_cols), len(param_index)))
+        for i, col in enumerate(pre_cols):
+            R[i, param_index.index(col)] = 1.0
+        pt_test = fit.f_test(R)
         pt_pvalue = float(np.asarray(pt_test.pvalue).item())
     else:
         pt_pvalue = float("nan")

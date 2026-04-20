@@ -24,6 +24,7 @@ which fixed an off-by-2 bug in an earlier version.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 
 import numpy as np
 from scipy import stats
@@ -125,21 +126,23 @@ def msprt_sequential_test(
     )
 
 
+@lru_cache(maxsize=128)
 def pocock_critical_value(alpha: float, K: int) -> float:
     """
     Per-look two-sided Z critical value for Pocock's design with K equally-
-    spaced looks and overall Type-I error alpha. Numerically inverted via
-    bisection on the joint Normal multiple-testing distribution.
+    spaced looks and overall Type-I error alpha.
+
+    Computed by Monte Carlo simulation of the joint distribution of standardised
+    test statistics across looks under H0. Results are cached via ``lru_cache``
+    since tests may call this hundreds of times with the same (alpha, K).
     """
-    # Approximate the per-look |Z| critical value c such that
+    # Per-look |Z| critical value c such that
     # P(max_{k=1..K} |Z_k| > c) = alpha under H0,
     # where (Z_1, ..., Z_K) are jointly Normal with corr(Z_i, Z_j) = sqrt(i/j).
-    # Use the closed-form approximation from Pocock (1977) tables via simulation.
     from numpy.random import default_rng
     rng = default_rng(0)
     n_sim = 200_000
     incr = rng.standard_normal((n_sim, K))
-    # Cumulative test statistic at each look (running mean scaled by sqrt(k))
     cumsum = incr.cumsum(axis=1)
     Z = cumsum / np.sqrt(np.arange(1, K + 1))
     max_abs = np.max(np.abs(Z), axis=1)

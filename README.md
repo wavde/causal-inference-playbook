@@ -6,14 +6,14 @@
 
 ## Why this repo
 
-Most analytics portfolios stop at "ran a t-test on A/B data." Senior analytics work at FAANG-scale companies looks different:
+A/B tests are only part of the job. Senior analytics work at FAANG-scale companies demands a broader toolkit:
 
 - **Variance reduction** (CUPED, stratification) because 1% MDEs require ruthless efficiency
 - **Quasi-experiments** (synthetic control, diff-in-diff) because you can't always randomize
 - **Sequential tests** because business stakeholders peek at dashboards
 - **Memo-writing** because the analysis is only as good as the decision it drives
 
-This repo is a running collection of case studies, each with code *and* a written memo.
+Each case study pairs working code with a written writeup.
 
 ## Case Studies
 
@@ -25,27 +25,24 @@ This repo is a running collection of case studies, each with code *and* a writte
 | 04 | [Propensity score matching](case-studies/04-propensity-score/) | PSM + IPW + doubly-robust (AIPW) | ✅ Complete |
 | 05 | [Sequential testing](case-studies/05-sequential-testing/) | mSPRT + Pocock alpha-spending | ✅ Complete |
 
-## Repo layout
+Each case study follows the same skeleton:
 
 ```
-case-studies/
-  01-ab-cuped/        # fully worked example — use this as the quality bar
-    src/              # reusable code
-    docs/             # memo-style writeup
-    notebook.ipynb    # reproducible analysis
-    README.md
-  02-...              # planned
-tests/                # unit tests for shared utilities
-.github/workflows/    # CI
+case-studies/NN-name/
+  src/          # implementation + simulator + reproducer
+  README.md     # framing, method, results, limitations
 ```
+
+Shared tests live at `tests/`; CI config at `.github/workflows/`.
 
 ## How to run
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate        # Windows
+.venv\Scripts\activate          # Windows
+source .venv/bin/activate       # macOS / Linux
 pip install -r requirements.txt
-pytest -q                     # runs smoke tests
+pytest -q
 ```
 
 Each case study's README documents how to reproduce its analysis.

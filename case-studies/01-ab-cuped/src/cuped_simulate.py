@@ -37,7 +37,7 @@ def simulate_experiment(
     pre = rng.normal(loc=120, scale=40, size=n)
 
     noise_scale = 40 * np.sqrt(1 - correlation**2)
-    base_post = correlation * (40 / 40) * (pre - 120) + 120
+    base_post = correlation * (pre - 120) + 120
     noise = rng.normal(0, noise_scale, size=n)
 
     treatment = rng.integers(0, 2, size=n)

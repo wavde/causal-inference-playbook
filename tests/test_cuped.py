@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "case-studies" / "01-ab-cuped" / "src"))
 
 from cuped import apply_cuped, compute_theta, cuped_ab_test, naive_ab_test  # noqa: E402
-from simulate import simulate_experiment  # noqa: E402
+from cuped_simulate import simulate_experiment  # noqa: E402
 
 
 def test_theta_zero_when_uncorrelated():

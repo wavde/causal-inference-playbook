@@ -24,8 +24,13 @@ from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.neighbors import NearestNeighbors
+
+# Rosenbaum-Rubin (1985) recommend a matching caliper of 0.2 × SD of the logit
+# propensity. ``PROPENSITY_CLIP`` keeps propensities strictly inside (0,1) so
+# that logit and IPW weights stay finite.
+PROPENSITY_CLIP = 1e-4
 
 
 @dataclass
@@ -58,7 +63,7 @@ def estimate_propensity(
     model.fit(X, T)
     e = model.predict_proba(X)[:, 1]
     # Clip away from 0/1 for numerical stability of logit and IPW.
-    return np.clip(e, 1e-4, 1 - 1e-4)
+    return np.clip(e, PROPENSITY_CLIP, 1 - PROPENSITY_CLIP)
 
 
 def standardized_mean_diff(
@@ -186,8 +191,6 @@ def aipw_att(
     Consistent if *either* the propensity model or the outcome model is correct.
     Outcome model: linear regression of Y on X among controls only.
     """
-    from sklearn.linear_model import LinearRegression
-
     e = estimate_propensity(X, T)
     mu0_model = LinearRegression().fit(X[T == 0], Y[T == 0])
     mu0_hat = mu0_model.predict(X)

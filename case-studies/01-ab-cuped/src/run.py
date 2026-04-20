@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from cuped import cuped_ab_test, naive_ab_test, variance_reduction  # noqa: E402
-from simulate import simulate_experiment  # noqa: E402
+from cuped_simulate import simulate_experiment  # noqa: E402
 
 
 def main() -> None:
