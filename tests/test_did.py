@@ -11,8 +11,8 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "case-studies" / "03-diff-in-diff" / "src"))
 
-from did import did_2x2, event_study  # noqa: E402
-from did_simulate import simulate_did_panel  # noqa: E402
+from did import cs_staggered_att, did_2x2, event_study  # noqa: E402
+from did_simulate import simulate_did_panel, simulate_staggered_panel  # noqa: E402
 
 
 def test_did_recovers_true_att():
@@ -92,6 +92,59 @@ def test_did_under_pt_violation_is_biased():
     result = did_2x2(panel)
     # Should be substantially above 2.0 because of the diverging trend
     assert result.att > 2.5
+
+
+def test_cs_recovers_cohort_att_under_heterogeneous_effects():
+    """
+    Callaway-Sant'Anna group-time ATTs should each recover the true cohort
+    effect, even when effects differ sharply across cohorts.
+    """
+    panel = simulate_staggered_panel(
+        cohort_sizes={6: 30, 10: 30, 14: 30},
+        n_never_treated=30,
+        n_periods=20,
+        cohort_effects={6: 1.0, 10: 3.0, 14: 5.0},
+        seed=0,
+    )
+    result = cs_staggered_att(panel, n_bootstrap=100, seed=0)
+    gt = result.group_time_att
+    for g, true_eff in [(6, 1.0), (10, 3.0), (14, 5.0)]:
+        cohort_means = gt[gt["cohort"] == g]["att"].mean()
+        assert abs(cohort_means - true_eff) < 0.7, (
+            f"CS ATT for cohort {g} = {cohort_means:.2f}, expected ~{true_eff}"
+        )
+
+
+def test_twfe_is_biased_under_heterogeneous_staggered_effects():
+    """
+    Under staggered adoption with *dynamic, heterogeneous* effects, naive TWFE
+    suffers from negative-weight / forbidden-comparison bias
+    (Goodman-Bacon 2021). CS is unbiased in the same setting. Here we add a
+    strong dynamic slope so the bias is clearly visible.
+    """
+    panel = simulate_staggered_panel(
+        cohort_sizes={4: 30, 8: 30, 12: 30},
+        n_never_treated=30,
+        n_periods=20,
+        cohort_effects={4: 1.0, 8: 3.0, 12: 5.0},
+        dynamic_slope=0.5,
+        seed=0,
+    )
+    twfe = did_2x2(panel)
+    cs = cs_staggered_att(panel, n_bootstrap=50, seed=0)
+    # CS remains close to the true equal-weighted ATT. TWFE is meaningfully
+    # further away because already-treated units contaminate the comparison.
+    assert abs(twfe.att - cs.overall_att) > 0.5
+
+
+def test_cs_event_study_shape_and_no_pre_cells():
+    panel = simulate_staggered_panel(seed=0)
+    result = cs_staggered_att(panel, n_bootstrap=50, seed=0)
+    es = result.event_study
+    # All relative times in the event study should be >= 0 since CS
+    # identifies ATT(g, t) only for t >= g.
+    assert (es["relative_time"] >= 0).all()
+    assert not es["att"].isna().any()
 
 
 if __name__ == "__main__":

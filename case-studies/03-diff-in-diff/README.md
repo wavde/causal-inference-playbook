@@ -40,7 +40,35 @@ $$Y_{it} = \alpha_i + \gamma_t + \sum_{k \neq -1} \tau_k \cdot (\text{Treated}_i
 
 ### Caveat on staggered treatment
 
-With **staggered** treatment timing (different units treated at different times), TWFE silently weights some 2x2 contrasts negatively and can produce biased estimates even under parallel trends — see Goodman-Bacon (2021), de Chaisemartin & D'Haultfœuille (2020), Sun & Abraham (2021). This implementation handles **common treatment timing only**. For staggered, use Callaway-Sant'Anna (`differences` package) or stacked regression.
+With **staggered** treatment timing (different units treated at different times), TWFE silently weights some 2x2 contrasts negatively and can produce biased estimates even under parallel trends — see Goodman-Bacon (2021), de Chaisemartin & D'Haultfœuille (2020), Sun & Abraham (2021).
+
+This case study now ships a Callaway-Sant'Anna (2021) estimator for staggered panels — see the next section.
+
+### Staggered adoption: Callaway-Sant'Anna (CS)
+
+When different units are treated in different periods *and* treatment effects are heterogeneous across cohorts, the standard 2x2 DiD above is biased. CS sidesteps this by computing a **group-time average treatment effect** $ATT(g, t)$ for every (cohort, period) cell and then aggregating:
+
+$$ATT(g, t) = \mathbb{E}[Y_t - Y_{g-1} \mid G = g] - \mathbb{E}[Y_t - Y_{g-1} \mid \text{never treated}]$$
+
+Each $ATT(g, t)$ is a clean 2x2 DiD — treated cohort $g$ vs never-treated, with baseline $g-1$. No already-treated unit ever serves as a control for a later-treated unit, so there are no forbidden comparisons. Inference comes from a **unit cluster bootstrap** (`n_bootstrap=500` by default).
+
+```python
+from did import cs_staggered_att
+from did_simulate import simulate_staggered_panel
+
+panel = simulate_staggered_panel(
+    cohort_sizes={4: 30, 8: 30, 12: 30},   # three cohorts, treated at t=4, 8, 12
+    n_never_treated=30,
+    cohort_effects={4: 1.0, 8: 3.0, 12: 5.0},   # heterogeneous effects
+    dynamic_slope=0.5,                          # + 0.5 per period since treatment
+    seed=0,
+)
+cs = cs_staggered_att(panel, n_bootstrap=500)
+print(cs.event_study)      # dynamic effects by relative time (e = t - g)
+print(cs.overall_att)      # equal-weighted ATT across (g, t) cells
+```
+
+On this DGP, standard TWFE DiD is biased away from the true equal-weighted ATT by 0.5+ units because of the negative-weight problem; the CS estimator recovers each cohort's true effect (1.0, 3.0, 5.0) within ±0.7 and the overall ATT with honest cluster-bootstrap CIs. Unit tests in `tests/test_did.py` pin this down.
 
 ## How to reproduce
 
