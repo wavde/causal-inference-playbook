@@ -224,3 +224,106 @@ def in_time_placebo(
         pre_periods=fake_pre_periods,
         donor_names=donor_names,
     )
+
+
+@dataclass
+class ATTBootstrapCI:
+    """Block-bootstrap CI for the post-period synthetic-control ATT."""
+
+    att: float
+    ci_low: float
+    ci_high: float
+    se: float
+    p_value: float
+    alpha: float
+    block_length: int
+    n_bootstrap: int
+
+    def __repr__(self) -> str:
+        return (
+            f"ATTBootstrapCI(ATT={self.att:+.3f}, "
+            f"{int((1 - self.alpha) * 100)}% CI [{self.ci_low:+.3f}, {self.ci_high:+.3f}], "
+            f"SE={self.se:.3f}, p={self.p_value:.4f}, "
+            f"block_len={self.block_length}, B={self.n_bootstrap})"
+        )
+
+
+def block_bootstrap_att_ci(
+    result: SyntheticControlResult,
+    block_length: int = 3,
+    n_bootstrap: int = 1000,
+    alpha: float = 0.05,
+    seed: int = 0,
+) -> ATTBootstrapCI:
+    """
+    Moving-block bootstrap confidence interval for the synthetic-control ATT.
+
+    Idea (Politis-Romano 1994 moving-block bootstrap adapted to SC):
+    the pre-period gap ``y_treated - y_synthetic`` is a trajectory of fitting
+    residuals. If the donor-weight fit is honest, those residuals
+    characterise the remaining noise in the counterfactual. Under the null
+    of no treatment effect, post-treatment residuals would be draws from the
+    same process. We mimic that by resampling overlapping blocks of
+    pre-period residuals to construct a null distribution for the post-period
+    average gap, then invert to get a CI and a two-sided p-value for the
+    observed ATT.
+
+    Parameters
+    ----------
+    result : fitted SyntheticControlResult (from fit_synthetic_control).
+    block_length : length of the moving blocks (3-6 is typical; use longer
+        blocks when pre-period residuals are strongly autocorrelated).
+    n_bootstrap : number of bootstrap replicates.
+    alpha : confidence level (default 5%).
+    seed : RNG seed.
+
+    Returns
+    -------
+    ATTBootstrapCI with point estimate, CI, bootstrap SE, and the p-value
+    from the null distribution.
+
+    Caveats
+    -------
+    This assumes the pre-period residuals are (approximately) stationary
+    and that the donor weights are stable across bootstrap replicates.
+    For more conservative inference, prefer Abadie's placebo-permutation
+    test (``in_space_placebo`` + ``placebo_pvalue``) or Chernozhukov et al.
+    (2021) conformal inference for SC.
+    """
+    if block_length < 1:
+        raise ValueError("block_length must be >= 1")
+    pre_gap = np.asarray(result.gap[: result.pre_periods], dtype=float)
+    n_pre = len(pre_gap)
+    if block_length > n_pre:
+        raise ValueError("block_length exceeds number of pre-periods")
+    t_post = int(result.post_periods)
+    if t_post == 0:
+        raise ValueError("result has zero post-periods; nothing to bootstrap")
+
+    rng = np.random.default_rng(seed)
+    n_blocks_needed = int(np.ceil(t_post / block_length))
+    max_start = n_pre - block_length + 1
+
+    null_atts = np.empty(n_bootstrap)
+    for b in range(n_bootstrap):
+        starts = rng.integers(0, max_start, size=n_blocks_needed)
+        blocks = [pre_gap[s : s + block_length] for s in starts]
+        samples = np.concatenate(blocks)[:t_post]
+        null_atts[b] = float(samples.mean())
+
+    se = float(null_atts.std(ddof=1))
+    # Two-sided CI: ATT +/- quantile(|null|, 1 - alpha). The null dist is
+    # centered near 0 so |.| quantile gives a symmetric two-sided half-width.
+    half_width = float(np.quantile(np.abs(null_atts), 1 - alpha))
+    p_value = float((np.abs(null_atts) >= abs(result.att)).mean())
+
+    return ATTBootstrapCI(
+        att=float(result.att),
+        ci_low=float(result.att - half_width),
+        ci_high=float(result.att + half_width),
+        se=se,
+        p_value=p_value,
+        alpha=alpha,
+        block_length=block_length,
+        n_bootstrap=n_bootstrap,
+    )

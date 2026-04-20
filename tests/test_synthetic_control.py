@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT / "case-studies" / "02-synthetic-control" / "src"))
 from sc_simulate import panel_to_matrix, simulate_panel  # noqa: E402
 from synthetic_control import (  # noqa: E402
     _fit_weights,
+    block_bootstrap_att_ci,
     fit_synthetic_control,
     in_space_placebo,
     in_time_placebo,
@@ -99,6 +100,55 @@ def test_shape_validation():
     Y = rng.normal(size=(12, 5))  # mismatched T
     with pytest.raises(ValueError):
         fit_synthetic_control(y, Y, pre_periods=5)
+
+
+def test_block_bootstrap_ci_covers_truth_at_nonzero_effect():
+    """With a large true effect, bootstrap CI should exclude 0 and contain ATT."""
+    panel = simulate_panel(
+        n_units=20, n_periods=30, pre_periods=20,
+        treated_idx=0, true_effect=-8.0, seed=0,
+    )
+    y1, Y0, donors = panel_to_matrix(panel, "country_00")
+    result = fit_synthetic_control(y1, Y0, pre_periods=20, donor_names=donors)
+    ci = block_bootstrap_att_ci(result, block_length=3, n_bootstrap=400, seed=0)
+    # CI should contain the point estimate by construction.
+    assert ci.ci_low <= ci.att <= ci.ci_high
+    # With a true effect of -8, CI should exclude 0.
+    assert ci.ci_high < 0
+    # p-value should be small.
+    assert ci.p_value < 0.05
+
+
+def test_block_bootstrap_ci_has_reasonable_null_coverage():
+    """
+    Across many simulations with true_effect=0, the bootstrap CI should
+    contain 0 at roughly the nominal rate. We accept 70%+ coverage because
+    block-bootstrap on pre-period residuals under-represents variance when
+    the donor fit is over-smooth (a known limitation, noted in the README).
+    """
+    covered = 0
+    total = 20
+    for s in range(total):
+        panel = simulate_panel(
+            n_units=20, n_periods=30, pre_periods=20,
+            treated_idx=0, true_effect=0.0, seed=s,
+        )
+        y1, Y0, donors = panel_to_matrix(panel, "country_00")
+        result = fit_synthetic_control(y1, Y0, pre_periods=20, donor_names=donors)
+        ci = block_bootstrap_att_ci(result, block_length=3, n_bootstrap=300, seed=s)
+        if ci.ci_low <= 0 <= ci.ci_high:
+            covered += 1
+    assert covered / total >= 0.70, f"coverage = {covered}/{total}"
+
+
+def test_block_bootstrap_rejects_bad_inputs():
+    panel = simulate_panel(n_units=10, n_periods=10, pre_periods=8, seed=0)
+    y1, Y0, donors = panel_to_matrix(panel, "country_00")
+    result = fit_synthetic_control(y1, Y0, pre_periods=8, donor_names=donors)
+    with pytest.raises(ValueError):
+        block_bootstrap_att_ci(result, block_length=0)
+    with pytest.raises(ValueError):
+        block_bootstrap_att_ci(result, block_length=99)
 
 
 if __name__ == "__main__":

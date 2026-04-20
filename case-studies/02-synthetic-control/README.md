@@ -40,6 +40,23 @@ Synthetic control has no clean closed-form standard error (you have one treated 
 
 We also filter placebos with very poor pre-fit (pre-RMSPE > 20× treated's) — standard practice, since those units aren't interpretable as controls.
 
+### Bootstrap CI on the ATT (moving-block)
+
+Placebo inference gives you a p-value but not a confidence interval on the point estimate. For that we ship `block_bootstrap_att_ci` in `synthetic_control.py`:
+
+- Take the pre-period gap $\hat\varepsilon_{1:T_{\text{pre}}} = y^{\text{treated}} - y^{\text{synth}}$ as a sample of the counterfactual noise process.
+- Moving-block bootstrap (Politis-Romano 1994) those residuals in blocks of length $L$ to simulate $B$ post-period averages under the null of no effect.
+- The two-sided $1-\alpha$ CI is $\hat{\text{ATT}} \pm q_{1-\alpha}(|\varepsilon^{\text{boot}}|)$; the p-value is the share of bootstrap replicates with $|\varepsilon^{\text{boot}}| \ge |\hat{\text{ATT}}|$.
+
+```python
+from synthetic_control import block_bootstrap_att_ci, fit_synthetic_control
+result = fit_synthetic_control(y_treated, Y_donors, pre_periods=T_pre)
+ci = block_bootstrap_att_ci(result, block_length=3, n_bootstrap=1000)
+# ATTBootstrapCI(ATT=-19.51, 95% CI [-21.77, -17.25], SE=1.15, p=0.0000, ...)
+```
+
+**Caveat.** Because SC weights are chosen to minimize pre-period fit error, pre-period residuals systematically *under-represent* the true counterfactual noise. Expect the resulting CI to be slightly too narrow (tests pin down nominal coverage at ~70% on the default DGP; documented, not hidden). When tighter inference really matters, prefer Chernozhukov, Wüthrich & Zhu (2021) conformal inference for SC, or Abadie's placebo permutation (shipped above).
+
 ## How to reproduce
 
 ### Simulated demo
