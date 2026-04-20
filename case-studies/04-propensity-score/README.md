@@ -55,10 +55,11 @@ Consistent if **either** the propensity model or the outcome model $\hat\mu_0$ i
 
 ```bash
 cd case-studies/04-propensity-score
-python src/run.py
+python src/run.py                 # simulated panel — recovers +$50 ATT
+python lalonde/run_lalonde.py     # real-data LaLonde 1986 replication
 ```
 
-Expected output (seed=0):
+### Simulated run (seed=0)
 
 ```
 Sample: n=5,000  treated=2,800  true ATT=+50.0
@@ -76,6 +77,13 @@ Covariate balance:
      region_score           0.21         0.01
 days_since_signup           0.05         0.01
 ```
+
+### Real-data replication — LaLonde (1986)
+
+See [`lalonde/`](lalonde/) for the canonical observational-causal benchmark:
+the NSW job-training experiment + Dehejia-Wahba CPS controls. Validates that
+the estimators recover the experimental ATT (~$1,794) on real data where the
+naive estimator is catastrophically wrong (~−$8,500).
 
 ## When PSM/IPW/AIPW help (and when they don't)
 
