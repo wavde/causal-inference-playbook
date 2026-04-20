@@ -20,10 +20,10 @@ This repo is a running collection of case studies, each with code *and* a writte
 | # | Case Study | Method | Status |
 |---|-----------|--------|--------|
 | 01 | [A/B test with CUPED](case-studies/01-ab-cuped/) | Regression-adjusted variance reduction | ✅ Complete |
-| 02 | [Synthetic control](case-studies/02-synthetic-control/) | Abadie-style synthetic control | 🚧 Planned |
-| 03 | [Difference-in-differences](case-studies/03-diff-in-diff/) | DiD + parallel trends diagnostic | 🚧 Planned |
-| 04 | [Propensity score matching](case-studies/04-propensity-score/) | PSM + doubly-robust estimation | 🚧 Planned |
-| 05 | [Sequential testing](case-studies/05-sequential-testing/) | mSPRT / always-valid p-values | 🚧 Planned |
+| 02 | [Synthetic control](case-studies/02-synthetic-control/) | Abadie weighted donors + placebo inference | ✅ Complete |
+| 03 | [Difference-in-differences](case-studies/03-diff-in-diff/) | TWFE + event study + parallel-trends test | ✅ Complete |
+| 04 | [Propensity score matching](case-studies/04-propensity-score/) | PSM + IPW + doubly-robust (AIPW) | ✅ Complete |
+| 05 | [Sequential testing](case-studies/05-sequential-testing/) | mSPRT + Pocock alpha-spending | ✅ Complete |
 
 ## Repo layout
 
@@ -55,6 +55,10 @@ Each case study's README documents how to reproduce its analysis.
 - Kohavi, Tang, Xu — *Trustworthy Online Controlled Experiments*
 - Deng et al. (2013) — *Improving the Sensitivity of Online Controlled Experiments by Utilizing Pre-Experiment Data* (CUPED)
 - Abadie, Diamond, Hainmueller (2010) — *Synthetic Control Methods*
+- Goodman-Bacon (2021) — *Difference-in-Differences with Variation in Treatment Timing*
+- Rosenbaum & Rubin (1983) — *The Central Role of the Propensity Score in Observational Studies*
+- Johari, Pekelis, Walsh (2017) — *Peeking at A/B Tests* (mSPRT)
+- Howard, Ramdas, McAuliffe, Sekhon (2021) — *Time-uniform, Nonparametric, Nonasymptotic Confidence Sequences*
 
 ## License
 
