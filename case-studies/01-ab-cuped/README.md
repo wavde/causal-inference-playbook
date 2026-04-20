@@ -27,6 +27,29 @@ Because the experiment is randomized, $X$ is independent of treatment assignment
 
 Run a standard two-sample test on $Y^{\text{cuped}}$ to get the treatment effect.
 
+### Power / MDE planning with CUPED
+
+Before an experiment launches, the question is almost always *"how long do we need to run?"* Case 01 ships a small planning helper in `src/power.py`:
+
+- `required_n_per_arm(mde, sigma, rho, alpha, power)` — classical two-sample sample-size formula, scaled by $(1 - \rho^2)$ when a CUPED covariate is available.
+- `mde_at_n(n_per_arm, sigma, rho, alpha, power)` — the inverse question: at your planned N, what MDE can you detect?
+- `cuped_power_summary(...)` — side-by-side of naive vs CUPED required N + the absolute/percent saving.
+- `mde_vs_rho(...)` / `plot_mde_vs_rho(...)` — sweep $\rho$ to show the shrinking MDE curve that anchors the conversation with PMs ("every +0.1 in pre-period correlation buys us X more sensitivity").
+
+```python
+from power import cuped_power_summary, plot_mde_vs_rho
+
+cuped_power_summary(mde=0.1, sigma=1.0, rho=0.6)
+# -> {'n_naive_per_arm': 1569, 'n_cuped_per_arm': 1004,
+#     'absolute_saving': 565, 'percent_reduction': 0.360, ...}
+
+import matplotlib.pyplot as plt
+plot_mde_vs_rho(n_per_arm=5000, sigma=1.0)
+plt.savefig("mde_vs_rho.png")
+```
+
+Rule of thumb: CUPED at $\rho = 0.7$ cuts required sample size by about **50%**, at $\rho = 0.8$ by about **65%**. If the pre-period covariate has $\rho < 0.3$ the savings aren't worth the plumbing.
+
 ## How to reproduce
 
 ```bash
