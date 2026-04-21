@@ -1,42 +1,42 @@
 # Causal Inference Playbook
 
-> A hands-on tour of experimentation and causal methods used in senior analytics work — each case study paired with a memo-style writeup.
+> Worked case studies in experimentation and quasi-experimental methods, each paired with a memo-style writeup.
 
 ![CI](https://github.com/wavde/causal-inference-playbook/actions/workflows/ci.yml/badge.svg)
 
 ![hero](docs/hero.png)
 
-## Why this repo
+A reference set of end-to-end case studies covering the methods analysts reach for when a clean A/B test is not available, or when a clean A/B test is available but variance has to be wrung out of it. Each case pairs working code with a short memo that states the question, the method, the results, and the limitations.
 
-A/B tests are only part of the job. Senior analytics work at FAANG-scale companies demands a broader toolkit:
+Intended audience: practitioners who want a comparable reference implementation of each method, reviewers who want to see the diagnostics alongside the estimate, and anyone preparing for an interview loop that covers causal methods in depth.
 
-- **Variance reduction** (CUPED, stratification) because 1% MDEs require ruthless efficiency
-- **Quasi-experiments** (synthetic control, diff-in-diff) because you can't always randomize
-- **Sequential tests** because business stakeholders peek at dashboards
-- **Memo-writing** because the analysis is only as good as the decision it drives
+## What each method earns its place for
 
-Each case study pairs working code with a written writeup.
+- **Variance reduction** (CUPED, stratification), for the regime where MDEs are small and sample size is the binding constraint.
+- **Quasi-experiments** (synthetic control, difference-in-differences), for interventions that cannot be randomised.
+- **Sequential tests**, because stakeholders look at dashboards on their own schedule.
+- **Memo-writing**, because the analysis only matters through the decision it informs.
 
-## Case Studies
+## Case studies
 
-| # | Case Study | Method | Status |
+| # | Case study | Method | Status |
 |---|-----------|--------|--------|
-| 01 | [A/B test with CUPED](case-studies/01-ab-cuped/) | Regression-adjusted variance reduction | ✅ Complete |
-| 02 | [Synthetic control](case-studies/02-synthetic-control/) | Abadie weighted donors + placebo inference | ✅ Complete |
-| 03 | [Difference-in-differences](case-studies/03-diff-in-diff/) | TWFE + event study + parallel-trends test | ✅ Complete |
-| 04 | [Propensity score matching](case-studies/04-propensity-score/) | PSM + IPW + doubly-robust (AIPW) | ✅ Complete |
-| 05 | [Sequential testing](case-studies/05-sequential-testing/) | mSPRT + Pocock alpha-spending | ✅ Complete |
-| 06 | [Switchback (marketplace)](case-studies/06-switchback/) | Block-level randomization under SUTVA violation | ✅ Complete |
+| 01 | [A/B test with CUPED](case-studies/01-ab-cuped/) | Regression-adjusted variance reduction | Complete |
+| 02 | [Synthetic control](case-studies/02-synthetic-control/) | Abadie weighted donors with placebo inference | Complete |
+| 03 | [Difference-in-differences](case-studies/03-diff-in-diff/) | TWFE, event study, Callaway-Sant'Anna | Complete |
+| 04 | [Propensity score matching](case-studies/04-propensity-score/) | PSM, IPW, doubly-robust AIPW, LaLonde replication | Complete |
+| 05 | [Sequential testing](case-studies/05-sequential-testing/) | mSPRT, Pocock alpha-spending | Complete |
+| 06 | [Switchback (marketplace)](case-studies/06-switchback/) | Block-level randomisation under SUTVA violation | Complete |
 
-Each case study follows the same skeleton:
+Each case study uses the same layout:
 
 ```
 case-studies/NN-name/
-  src/          # implementation + simulator + reproducer
+  src/          # implementation, simulator, reproducer
   README.md     # framing, method, results, limitations
 ```
 
-Shared tests live at `tests/`; CI config at `.github/workflows/`.
+Shared tests are in `tests/`; CI configuration is in `.github/workflows/`.
 
 ## How to run
 
@@ -48,18 +48,23 @@ pip install -r requirements.txt
 pytest -q
 ```
 
-Each case study's README documents how to reproduce its analysis.
+Each case README has its own reproducer command.
+
+## Out of scope
+
+This repository does not cover structural causal models, instrumental-variable designs, mediation analysis, or Bayesian causal machinery. It also does not ship any production pipeline; the data is simulated or, in the LaLonde case, public.
 
 ## References
 
-- Kohavi, Tang, Xu — *Trustworthy Online Controlled Experiments*
-- Deng et al. (2013) — *Improving the Sensitivity of Online Controlled Experiments by Utilizing Pre-Experiment Data* (CUPED)
-- Abadie, Diamond, Hainmueller (2010) — *Synthetic Control Methods*
-- Goodman-Bacon (2021) — *Difference-in-Differences with Variation in Treatment Timing*
-- Rosenbaum & Rubin (1983) — *The Central Role of the Propensity Score in Observational Studies*
-- Johari, Pekelis, Walsh (2017) — *Peeking at A/B Tests* (mSPRT)
-- Howard, Ramdas, McAuliffe, Sekhon (2021) — *Time-uniform, Nonparametric, Nonasymptotic Confidence Sequences*
+- Kohavi, Tang, Xu. *Trustworthy Online Controlled Experiments.*
+- Deng et al. (2013). Improving the sensitivity of online controlled experiments using pre-experiment data (CUPED).
+- Abadie, Diamond, Hainmueller (2010). Synthetic control methods.
+- Goodman-Bacon (2021). Difference-in-differences with variation in treatment timing.
+- Callaway & Sant'Anna (2021). Difference-in-differences with multiple time periods.
+- Rosenbaum & Rubin (1983). The central role of the propensity score.
+- Johari, Pekelis, Walsh (2017). Peeking at A/B tests (mSPRT).
+- Howard, Ramdas, McAuliffe, Sekhon (2021). Time-uniform confidence sequences.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
