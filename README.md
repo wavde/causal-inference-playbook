@@ -38,6 +38,10 @@ case-studies/NN-name/
 
 Shared tests are in `tests/`; CI configuration is in `.github/workflows/`.
 
+## Companion repo: paid-media measurement
+
+The synthetic-control method in case 02 and the DiD method in case 03 are the foundations for paid-media geo-lift measurement. A worked paid-media application lives in a sibling repo, [**paid-media-playbook**](https://github.com/wavde/paid-media-playbook): DMA-level geo lift, multi-touch attribution, incrementality, MMM, and web attribution with cookie-loss and iOS ATT accounting.
+
 ## How to run
 
 ```bash
