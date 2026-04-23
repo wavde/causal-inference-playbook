@@ -11,7 +11,7 @@ On 5,000 simulated e-commerce users where the true effect of app install is +$50
 
 ## Business framing
 
-Most "did feature X cause outcome Y?" questions at FAANG analytics aren't experiments. They're observational:
+Most "did feature X cause outcome Y?" questions at large tech companies aren't experiments. They're observational:
 
 - *Did users who joined community feature retain better?* (community joiners self-select)
 - *Did sellers who used the new dashboard ship faster?* (proactive sellers self-select)
