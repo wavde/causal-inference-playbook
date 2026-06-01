@@ -20,13 +20,13 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
 
+from seq_simulate import simulate_stream  # noqa: E402
 from sequential import (  # noqa: E402
     fixed_horizon_zscore,
     msprt_sequential_test,
     naive_peeking_test,
     pocock_sequential_test,
 )
-from seq_simulate import simulate_stream  # noqa: E402
 
 
 def empirical_rejection_rate(

@@ -26,6 +26,8 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.neighbors import NearestNeighbors
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
 # Rosenbaum-Rubin (1985) recommend a matching caliper of 0.2 × SD of the logit
 # propensity. ``PROPENSITY_CLIP`` keeps propensities strictly inside (0,1) so
@@ -58,8 +60,17 @@ def estimate_propensity(
     T: np.ndarray,
     C: float = 1.0,
 ) -> np.ndarray:
-    """Logistic regression P(T=1 | X). Returns propensity in (0,1)."""
-    model = LogisticRegression(C=C, max_iter=1000)
+    """Logistic regression P(T=1 | X). Returns propensity in (0,1).
+
+    Covariates are standardized before fitting so the L2 penalty applies on a
+    common scale — without this, raw dollar-scale features (e.g., earnings)
+    would be penalized far more heavily than indicator covariates, distorting
+    the fitted propensities.
+    """
+    model = make_pipeline(
+        StandardScaler(),
+        LogisticRegression(C=C, max_iter=1000),
+    )
     model.fit(X, T)
     e = model.predict_proba(X)[:, 1]
     # Clip away from 0/1 for numerical stability of logit and IPW.

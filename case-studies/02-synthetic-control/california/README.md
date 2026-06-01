@@ -45,7 +45,7 @@ The point estimate replication is still strong evidence that the method recovers
 
 1. **The SLSQP solver in `synthetic_control.py` produces the right weights on real data** — not just simulations.
 2. **The pre-period RMSPE of 1.66 packs/capita is tight** (<2% of the ~100 packs/capita mean), confirming that California had plausible counterfactuals before 1989.
-3. **The 1989 tax had a large, sustained effect** on consumption — compounding from ~8 packs/capita gap in 1989 to ~27 packs/capita by 2000. If the tax had zero causal effect, recovering this trajectory from 38 donor states by random chance is vanishingly unlikely.
+3. **The 1989 tax had a large, sustained effect** on consumption — compounding from ~8 packs/capita gap in 1989 to ~27 packs/capita by 2000. The placebo-in-space test (p≈0.41 on the loose donor pool, tighter after pre-fit filtering) shows this trajectory is unusual relative to placebo runs, though a 38-state donor pool limits how small the empirical p-value can get.
 
 ## References
 

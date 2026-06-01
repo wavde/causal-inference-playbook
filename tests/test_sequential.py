@@ -11,6 +11,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "case-studies" / "05-sequential-testing" / "src"))
 
+from seq_simulate import simulate_stream, simulate_stream_with_covariate  # noqa: E402
 from sequential import (  # noqa: E402
     fixed_horizon_zscore,
     msprt_cuped,
@@ -20,7 +21,6 @@ from sequential import (  # noqa: E402
     pocock_critical_value,
     pocock_sequential_test,
 )
-from seq_simulate import simulate_stream, simulate_stream_with_covariate  # noqa: E402
 
 
 def test_fixed_horizon_basic():

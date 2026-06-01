@@ -27,26 +27,30 @@ cd case-studies/04-propensity-score
 python lalonde/run_lalonde.py
 ```
 
-On the observational (NSW-treated + CPS) panel you should see:
+On the observational (NSW-treated + CPS) panel you should see roughly:
 
 | Estimator | ATT | vs experimental benchmark |
 |---|---:|---|
 | Naive diff-in-means | ≈ −$8,500 | catastrophically wrong |
-| 1-NN PSM (caliper) | within a few hundred $ of benchmark | ✅ |
-| IPW | within a few hundred $ of benchmark | ✅ |
-| AIPW (doubly-robust) | within a few hundred $ of benchmark | ✅ |
+| 1-NN PSM (caliper) | order of the benchmark | sign and magnitude recovered |
+| IPW | order of the benchmark | sign and magnitude recovered |
+| AIPW (doubly-robust) | order of the benchmark | sign and magnitude recovered |
 | Experimental target | ≈ **$1,794** | |
 
-Exact numbers depend on the propensity-model specification; Dehejia-Wahba
-(1999) and follow-up work show that reasonable specifications recover the
-benchmark to within the sampling error of the original experiment.
+Exact numbers depend on the propensity-model specification and the CPS
+comparison sample, and the LaLonde/CPS setup is a genuinely hard problem —
+estimates vary across specifications. The robust, reproducible takeaway is
+directional: the naive estimate is badly negative (~−$8.5K), while propensity
+adjustment moves the ATT back to a positive, benchmark-comparable magnitude.
+Dehejia-Wahba (1999) and follow-up work discuss how specification-sensitive
+the point estimates are.
 
 ## Why this matters for a portfolio
 
 - **Real data, not simulation.** The canonical stress test for observational
   estimators — every senior causal-inference practitioner knows it.
-- **A testable claim.** "Naive is ~$8.5K wrong; our PSM is within sampling
-  error of the experimental benchmark."
+- **A testable claim.** "Naive is ~$8.5K wrong; propensity adjustment moves
+  the ATT back to a positive, benchmark-comparable magnitude."
 - **Narrow, contained scope.** One script, one table, one conclusion.
 
 ## Data source

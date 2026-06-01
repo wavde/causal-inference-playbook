@@ -52,7 +52,7 @@ def main() -> None:
     Y_all = wide.to_numpy()
     unit_names = list(wide.columns)
     placebos = in_space_placebo(
-        Y_all, pre_periods=pre, treated_idx=treated_idx, unit_names=unit_names
+        Y_all, pre_periods=pre, unit_names=unit_names
     )
     pval = placebo_pvalue(placebos, treated_name)
     print(f"\nPlacebo-in-space p-value (RMSPE-ratio rank): {pval:.3f}")

@@ -117,7 +117,6 @@ def main() -> None:
     placebos = in_space_placebo(
         Y_all=Y_all,
         pre_periods=pre_periods,
-        treated_idx=0,
         unit_names=_unit_names,
     )
     pval_loose = placebo_pvalue(placebos, TREATED_STATE)

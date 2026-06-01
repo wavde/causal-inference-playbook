@@ -201,7 +201,8 @@ def event_study(
 class CSResult:
     """Result of Callaway-Sant'Anna staggered DiD."""
 
-    group_time_att: pd.DataFrame   # columns: cohort, period, att, se, ci_low, ci_high, n_treated, n_control
+    # columns: cohort, period, att, se, ci_low, ci_high, n_treated, n_control
+    group_time_att: pd.DataFrame
     event_study: pd.DataFrame      # columns: relative_time, att, se, ci_low, ci_high
     overall_att: float
     overall_se: float
@@ -260,21 +261,27 @@ def cs_staggered_att(
     seed: int = 0,
 ) -> CSResult:
     """
-    Callaway & Sant'Anna (2021) staggered difference-in-differences.
+    Simplified Callaway & Sant'Anna (2021)-style staggered difference-in-differences.
 
     Estimates group-time average treatment effects ATT(g, t) using a
-    never-treated control group and the outcome-regression (unconditional)
-    identifier. Standard errors come from a **unit cluster bootstrap**.
+    never-treated control group and the unconditional outcome-regression
+    identifier. Like the full CS estimator, it avoids the forbidden
+    already-treated-as-control comparisons that bias two-way fixed-effects DiD
+    under cross-cohort effect heterogeneity (Goodman-Bacon 2021; de Chaisemartin
+    & D'Haultfoeuille 2020).
 
-    This estimator is robust to treatment-effect heterogeneity across cohorts,
-    unlike two-way fixed-effects DiD which is biased in that setting
-    (Goodman-Bacon 2021, de Chaisemartin & D'Haultfoeuille 2020).
+    Scope / what this does NOT implement (vs the full CS estimator and the
+    `did` R package): no not-yet-treated control group, no covariate
+    conditioning (doubly-robust / IPW / outcome-regression on X), and no
+    analytical influence-function standard errors. Inference here is a simple
+    **unit cluster bootstrap**, which is adequate for the unconditional,
+    never-treated design but is not a drop-in replacement for the full method.
 
     Parameters
     ----------
     df : long-format panel with columns [unit, period, outcome, cohort].
         ``cohort`` must be the treatment period for treated units and 0
-        for never-treated units.
+        for never-treated units. A never-treated group is required.
     n_bootstrap : number of cluster-bootstrap replications for inference.
     alpha : confidence level (default 5%).
 

@@ -42,15 +42,17 @@ $$Y_{it} = \alpha_i + \gamma_t + \sum_{k \neq -1} \tau_k \cdot (\text{Treated}_i
 
 With **staggered** treatment timing (different units treated at different times), TWFE silently weights some 2x2 contrasts negatively and can produce biased estimates even under parallel trends — see Goodman-Bacon (2021), de Chaisemartin & D'Haultfœuille (2020), Sun & Abraham (2021).
 
-This case study now ships a Callaway-Sant'Anna (2021) estimator for staggered panels — see the next section.
+This case study now ships a simplified Callaway-Sant'Anna (2021)-style estimator for staggered panels — see the next section.
 
-### Staggered adoption: Callaway-Sant'Anna (CS)
+### Staggered adoption: Callaway-Sant'Anna (CS), simplified
 
 When different units are treated in different periods *and* treatment effects are heterogeneous across cohorts, the standard 2x2 DiD above is biased. CS sidesteps this by computing a **group-time average treatment effect** $ATT(g, t)$ for every (cohort, period) cell and then aggregating:
 
 $$ATT(g, t) = \mathbb{E}[Y_t - Y_{g-1} \mid G = g] - \mathbb{E}[Y_t - Y_{g-1} \mid \text{never treated}]$$
 
 Each $ATT(g, t)$ is a clean 2x2 DiD — treated cohort $g$ vs never-treated, with baseline $g-1$. No already-treated unit ever serves as a control for a later-treated unit, so there are no forbidden comparisons. Inference comes from a **unit cluster bootstrap** (`n_bootstrap=500` by default).
+
+> **Scope.** This is the *unconditional, never-treated* version of CS. It does **not** implement the not-yet-treated control group, covariate conditioning (doubly-robust / IPW), or analytical influence-function standard errors that the full Callaway-Sant'Anna method and the `did` R package provide. It captures the core idea — clean group-time 2x2 contrasts that avoid TWFE's forbidden comparisons — not the complete estimator.
 
 ```python
 from did import cs_staggered_att
@@ -117,7 +119,7 @@ I built case study 02 (synthetic control) and this one as deliberate complements
 
 ## Limitations & what I'd do next
 
-1. **Common-timing assumption.** Add Callaway-Sant'Anna or Sun-Abraham as a `did_staggered` function for the staggered rollout case.
+1. **Fuller Callaway-Sant'Anna / Sun-Abraham.** The shipped `cs_staggered_att` is the unconditional, never-treated version. Extend it with a not-yet-treated control group, covariate-conditioned (doubly-robust) ATT(g,t), and analytical influence-function standard errors; add Sun-Abraham as an event-study alternative.
 2. **Wild cluster bootstrap.** With few treated clusters (< 30), cluster-robust SEs are anti-conservative. Implement Cameron-Gelbach-Miller (2008) wild bootstrap.
 3. **Triple-difference (DDD).** When parallel trends are suspect within a single market but might hold across a sub-population (e.g., "young vs old users in treated vs control countries"), DDD differences out the within-market trend.
 4. **Visualization.** A proper event-study plot (coef + 95% CI vs relative time, with vertical line at k=0) is the standard reviewer-facing artifact.
