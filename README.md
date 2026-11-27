@@ -37,7 +37,7 @@ case-studies/NN-name/
   README.md     # framing, method, results, limitations
 ```
 
-Case 07 is reproduced from the repository root with `python case-studies/07-ai-feature-adoption/src/run.py` (fixed seed; writes `results.md` and `docs/hero.png`).
+Case 07 is reproduced from the repository root with `python case-studies/07-ai-feature-adoption/src/run.py` (fixed seed; writes `results.md` and `docs/hero.png`). The companion essay is [Opt-in AI features: when an observational impact estimate is usable](https://github.com/wavde/wavde/blob/main/writing/opt-in-ai-adoption-observational-bias.md).
 
 Shared tests are in `tests/`; CI configuration is in `.github/workflows/`.
 
