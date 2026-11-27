@@ -27,6 +27,7 @@ Intended audience: practitioners who want a comparable reference implementation 
 | 04 | [Propensity score matching](case-studies/04-propensity-score/) | PSM, IPW, doubly-robust AIPW, LaLonde replication | Complete |
 | 05 | [Sequential testing](case-studies/05-sequential-testing/) | mSPRT, Pocock alpha-spending | Complete |
 | 06 | [Switchback (marketplace)](case-studies/06-switchback/) | Block-level randomisation under SUTVA violation | Complete |
+| 07 | [Opt-in AI feature adoption](case-studies/07-ai-feature-adoption/) | Naive vs AIPW vs DiD against a known ATT, fake-launch placebo, E-value | Complete |
 
 Each case study uses the same layout:
 
@@ -35,6 +36,8 @@ case-studies/NN-name/
   src/          # implementation, simulator, reproducer
   README.md     # framing, method, results, limitations
 ```
+
+Case 07 is reproduced from the repository root with `python case-studies/07-ai-feature-adoption/src/run.py` (fixed seed; writes `results.md` and `docs/hero.png`).
 
 Shared tests are in `tests/`; CI configuration is in `.github/workflows/`.
 
