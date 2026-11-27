@@ -9,7 +9,7 @@
 
 Observational estimates were usable only when whatever drove adoption also showed up in the pre-launch outcomes. A fake-launch placebo caught selection on a stable trait and on a pre-existing growth trend. It was blind to the case that matters most for AI tools: users who opt in *because* their need is rising at the same time. There, every estimator was biased by +0.724 to +0.844 sessions/week against a true ATT of 1.243. With a true effect of zero, the gated rule below still acted on a spurious effect in 95.3% to 97.2% of replications. If that channel is plausible, run a holdout.
 
-All numbers below are quoted from [`results.md`](results.md), which the reproducer writes.
+All numbers below are quoted from [`results.md`](results.md), which the reproducer writes. The companion essay is [Opt-in AI features: when an observational impact estimate is usable](https://github.com/wavde/wavde/blob/main/writing/opt-in-ai-adoption-observational-bias.md).
 
 ## Business framing
 
