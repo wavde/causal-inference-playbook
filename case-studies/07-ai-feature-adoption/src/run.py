@@ -3,6 +3,7 @@ Run the opt-in AI feature adoption case study end-to-end.
 
 Usage (from the repository root):
     python case-studies/07-ai-feature-adoption/src/run.py
+    python case-studies/07-ai-feature-adoption/src/run.py --smoke   # CI: tiny, temp output
 
 Writes:
     case-studies/07-ai-feature-adoption/results.md
@@ -11,7 +12,9 @@ Writes:
 
 from __future__ import annotations
 
+import argparse
 import sys
+import tempfile
 from pathlib import Path
 
 import matplotlib
@@ -159,6 +162,13 @@ def make_chart(draws: pd.DataFrame, summary: pd.DataFrame) -> None:
 
 
 def main() -> None:
+    global N_REPS, N_USERS, RESULTS, HERO
+    parser = argparse.ArgumentParser(description="Case 07: opt-in AI feature adoption")
+    parser.add_argument("--smoke", action="store_true", help="tiny run, output to a temp dir")
+    if parser.parse_args().smoke:
+        N_REPS, N_USERS = 4, 1000
+        tmp = Path(tempfile.mkdtemp())
+        RESULTS, HERO = tmp / "results.md", tmp / "docs" / "hero.png"
     draws = pd.concat([run_scenario(n, N_REPS, N_USERS, seed=SEED) for n in SCENARIOS],
                       ignore_index=True)
     summary = summarize(draws)
@@ -166,8 +176,8 @@ def main() -> None:
     make_chart(draws, summary)
     cols = ["scenario", "estimator", "true_att", "bias", "coverage", "placebo_flag", "acts_wrong"]
     print(summary[cols].round(3).to_string(index=False))
-    print(f"\nwrote {RESULTS.relative_to(CASE.parents[1])}")
-    print(f"wrote {HERO.relative_to(CASE.parents[1])}")
+    print(f"\nwrote {RESULTS}")
+    print(f"wrote {HERO}")
 
 
 if __name__ == "__main__":

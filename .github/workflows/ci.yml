@@ -29,3 +29,7 @@ jobs:
         run: ruff check .
       - name: Test
         run: pytest -q
+      - name: Smoke-run evidence scripts
+        run: |
+          python case-studies/07-ai-feature-adoption/src/run.py --smoke
+          python case-studies/08-rollout-vs-holdout/src/run.py --smoke
