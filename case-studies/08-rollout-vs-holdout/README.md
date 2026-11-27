@@ -5,6 +5,8 @@ measured with a randomized holdout or a staggered rollout, not an adopter compar
 the two should a team run when withheld traffic is the budget, and what does each one estimate
 when the effect grows (learning) or fades (novelty)?
 
+**Essay:** [A staggered rollout can't see novelty](https://github.com/wavde/wavde/blob/main/writing/staggered-rollout-vs-holdout.md)
+
 **Method:** a simulation with known short-run and long-run effects. It compares three designs
 that withhold the same 10% of post-launch user-weeks, using CUPED-adjusted intent-to-treat
 contrasts.
