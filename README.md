@@ -28,6 +28,7 @@ Intended audience: practitioners who want a comparable reference implementation 
 | 05 | [Sequential testing](case-studies/05-sequential-testing/) | mSPRT, Pocock alpha-spending | Complete |
 | 06 | [Switchback (marketplace)](case-studies/06-switchback/) | Block-level randomisation under SUTVA violation | Complete |
 | 07 | [Opt-in AI feature adoption](case-studies/07-ai-feature-adoption/) | Naive vs AIPW vs DiD against a known ATT, fake-launch placebo, E-value | Complete |
+| 08 | [Staggered rollout vs fixed holdout](case-studies/08-rollout-vs-holdout/) | Equal-cost randomized designs, short- vs long-run ITT, novelty and learning effects | Complete |
 
 Each case study uses the same layout:
 
